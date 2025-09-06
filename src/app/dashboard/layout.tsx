@@ -13,26 +13,26 @@ import { useState } from "react";
 const { Header, Sider, Content } = Layout;
 
 const menuItems = [
-  {
-    key: "/dashboard",
-    icon: <AppstoreOutlined />,
-    label: <Link href="/dashboard">Dashboard</Link>,
-  },
-  {
-    key: "/dashboard/clothes",
-    icon: <ShoppingOutlined />,
-    label: <Link href="/dashboard/clothes">Clothes</Link>,
-  },
+  // {
+  //   key: "/dashboard",
+  //   icon: <AppstoreOutlined />,
+  //   label: <Link href="/dashboard">Dashboard</Link>,
+  // },
   {
     key: "/dashboard/capital-records",
     icon: <DollarOutlined />,
-    label: <Link href="/dashboard/capital-records">Capital Records</Link>,
+    label: <Link href="/dashboard/capital-records">Investment Records</Link>,
   },
-  {
-    key: "/dashboard/transactions",
-    icon: <BarChartOutlined />,
-    label: <Link href="/dashboard/transactions">Transactions</Link>,
+    {
+    key: "/dashboard/clothes",
+    icon: <ShoppingOutlined />,
+    label: <Link href="/dashboard/clothes">Stock Management</Link>,
   },
+  // {
+  //   key: "/dashboard/transactions",
+  //   icon: <BarChartOutlined />,
+  //   label: <Link href="/dashboard/transactions">Transactions</Link>,
+  // },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -94,18 +94,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           transition: 'margin-left 0.2s',
         }}
       >
-        {/* <Header
-          style={{ background: "#fff", padding: "0 16px", display: "flex", alignItems: "center", borderBottom: "1px solid #f0f0f0" }}
-          className="lg:hidden"
-        >
-          <Button
-            icon={<MenuOutlined />}
-            type="text"
-            onClick={() => setDrawerOpen(true)}
-            style={{ marginRight: 16 }}
-          />
-          <span className="text-lg font-bold">Fintech Dashboard</span>
-        </Header> */}
         <Content style={{ margin: 0, padding: "0 0 0 0", background: "#f9f9f9", minHeight: 280 }}>
           {children}
         </Content>

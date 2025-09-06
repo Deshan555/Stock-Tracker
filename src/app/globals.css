@@ -844,3 +844,20 @@
   font-family: 'Poppins', sans-serif !important;
   font-size: 12px !important;
 }
+
+/* Ant Design Sidebar (Menu) custom styles */
+.ant-menu .ant-menu-item, .ant-menu .ant-menu-submenu-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 12px !important;
+  text-decoration: none !important;
+  margin-bottom: 10px !important;
+}
+
+.ant-menu .ant-menu-item-selected {
+  background-color: #a259ec !important; /* purple */
+  color: #fff !important;
+}
+
+.ant-menu .ant-menu-item-selected .ant-menu-title-content {
+  color: #fff !important;
+}
