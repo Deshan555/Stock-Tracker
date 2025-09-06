@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Table, Button, Space, Tag, Statistic, Card, Popconfirm, Drawer, Row, Col } from "antd";
+import { Table, Button, Space, Tag, Statistic, Card, Popconfirm, Drawer, Row, Col, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import AddClothesPage from "../new/page";
@@ -34,6 +34,7 @@ export default function ClothesByCapitalPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState("");
+    const [patternCodeFilter, setPatternCodeFilter] = useState<string | undefined>(undefined);
     const [category, setCategory] = useState<string | undefined>(undefined);
     const [stockStatus, setStockStatus] = useState<string | undefined>(undefined);
     const [dateRange, setDateRange] = useState<any>(null);
@@ -74,13 +75,25 @@ export default function ClothesByCapitalPage() {
             const matchesCategory = !category || item.category === category;
             const matchesStock = !stockStatus || item.stockStatus === stockStatus;
             const matchesDate = !dateRange || (item.createdAt && dayjs(item.createdAt).isAfter(dateRange[0]) && dayjs(item.createdAt).isBefore(dateRange[1]));
-            return matchesSearch && matchesCategory && matchesStock && matchesDate;
+            const matchesPatternCode = !patternCodeFilter || item.patternCode === patternCodeFilter;
+            return matchesSearch && matchesCategory && matchesStock && matchesDate && matchesPatternCode;
         });
-    }, [clothes, search, category, stockStatus, dateRange]);
+    }, [clothes, search, category, stockStatus, dateRange, patternCodeFilter]);
 
     // Table columns
     const columns: ColumnsType<Clothes> = [
-        { title: "Pattern Code", dataIndex: "patternCode", key: "patternCode", fixed: 'left', width: 120 },
+        {
+            title: "Pattern Code",
+            dataIndex: "patternCode",
+            key: "patternCode",
+            fixed: 'left',
+            width: 120,
+            filters: Array.from(new Set(clothes.map(c => c.patternCode).filter((code): code is string => Boolean(code)))).map(code => ({ text: code, value: code })),
+            onFilter: (value, record) => {
+                if (!value) return true;
+                return record.patternCode === value;
+            },
+        },
         { title: "Name", dataIndex: "name", key: "name", width: 140 },
         {
             title: "Category", dataIndex: "category", key: "category", filters: [
@@ -114,21 +127,21 @@ export default function ClothesByCapitalPage() {
         {
             title: "Actions", key: "actions", fixed: 'right', width: 120, render: (_, item) => (
                 <Space>
-                        <Button
-                            type="link"
-                            className="text-blue-600"
-                            style={{ padding: 0 }}
-                            onClick={() => setShowUpdateDrawer({
-                                drawerOpen: true,
-                                id: item._id,
-                                initialStockStatus: item.stockStatus,
-                                initialSalePrice: item.salePrice,
-                                initialDiscountedPrice: item.discountedPrice,
-                                initialPrisedPrice: item.prisedPrice,
-                            })}
-                        >
-                            Edit
-                        </Button>
+                    <Button
+                        type="link"
+                        className="text-blue-600"
+                        style={{ padding: 0 }}
+                        onClick={() => setShowUpdateDrawer({
+                            drawerOpen: true,
+                            id: item._id,
+                            initialStockStatus: item.stockStatus,
+                            initialSalePrice: item.salePrice,
+                            initialDiscountedPrice: item.discountedPrice,
+                            initialPrisedPrice: item.prisedPrice,
+                        })}
+                    >
+                        Edit
+                    </Button>
                     <Popconfirm title="Delete this item?" onConfirm={() => handleDelete(item._id)} okText="Yes" cancelText="No">
                         <Button type="link" danger>Delete</Button>
                     </Popconfirm>
@@ -141,6 +154,13 @@ export default function ClothesByCapitalPage() {
     const totalQty = filteredClothes.reduce((sum, c) => sum + (c.quantity || 0), 0);
     const totalWholesale = filteredClothes.reduce((sum, c) => sum + (c.wholesalePrice || 0), 0);
     const totalSale = filteredClothes.reduce((sum, c) => sum + (c.salePrice || 0), 0);
+    const soldItemCount = filteredClothes.filter(c => c.stockStatus === 'SOLD_OUT').length;
+    const existingCount = filteredClothes.filter(c => c.stockStatus !== 'SOLD_OUT').length;
+    const netProfit = filteredClothes
+        .filter(c => c.stockStatus === 'SOLD_OUT')
+        .reduce((sum, c) => sum + ((c.salePrice || 0) - (c.wholesalePrice || 0)), 0);
+
+    const expectedProfit = filteredClothes.reduce((sum, c) => sum + (c.prisedPrice || 0), 0);
 
     return (
         <div>
@@ -190,17 +210,41 @@ export default function ClothesByCapitalPage() {
       </Card> */}
             <Card style={{ marginBottom: 16, borderRadius: 10, width: '100%' }}>
                 <Row style={{ width: '100%' }} gutter={16}>
-                    <Col style={{ width: '25%' }}>
-                        <Statistic title="Total Items" value={filteredClothes.length} />
+                    <Col style={{ width: '16.6%' }}>
+                        <Statistic
+                            title={<span>Sold Item Count<br /><span style={{ fontSize: 12, color: '#888' }}>({filteredClothes.length > 0 ? ((soldItemCount / filteredClothes.length) * 100).toFixed(1) : 0}% of total)</span></span>}
+                            value={soldItemCount}
+                        />
                     </Col>
-                    <Col style={{ width: '25%' }}>
-                        <Statistic title="Total Quantity" value={totalQty} />
+                    <Col style={{ width: '16.6%' }}>
+                        <Statistic
+                            title={<span>Existing Count<br /><span style={{ fontSize: 12, color: '#888' }}>({filteredClothes.length > 0 ? ((existingCount / filteredClothes.length) * 100).toFixed(1) : 0}% of total)</span></span>}
+                            value={existingCount}
+                        />
                     </Col>
-                    <Col style={{ width: '25%' }}>
-                        <Statistic title="Total Wholesale" value={totalWholesale} precision={2} prefix="LKR" />
+                    <Col style={{ width: '16.6%' }}>
+                        <Statistic title="Total Wholesale" value={totalWholesale} precision={2} prefix="LKR" valueStyle={{ color: '#faad14' }}/>
                     </Col>
-                    <Col style={{ width: '25%' }}>
+                    <Col style={{ width: '16.6%' }}>
                         <Statistic title="Total Sale" value={totalSale} precision={2} prefix="LKR" />
+                    </Col>
+                    <Col style={{ width: '16.6%' }}>
+                        <Statistic
+                            title={<span>Expected Profit<br /><span style={{ fontSize: 12, color: '#888' }}>{expectedProfit > 0 && totalSale > 0 ? ((expectedProfit / totalSale) * 100).toFixed(1) : 0}% of sales</span></span>}
+                            value={expectedProfit}
+                            precision={2}
+                            prefix="LKR"
+                            valueStyle={{ color: '#1d39c4' }}
+                        />
+                    </Col>
+                    <Col style={{ width: '16.6%' }}>
+                        <Statistic
+                            title={<span>Net Profit (Sold)<br /><span style={{ fontSize: 12, color: '#888' }}>{totalSale > 0 ? ((netProfit / totalSale) * 100).toFixed(1) : 0}% margin</span></span>}
+                            value={netProfit}
+                            precision={2}
+                            prefix="LKR"
+                            valueStyle={{ color: netProfit >= 0 ? '#3f8600' : '#cf1322' }}
+                        />
                     </Col>
                 </Row>
             </Card>
@@ -216,9 +260,9 @@ export default function ClothesByCapitalPage() {
                 scroll={{ x: 1400 }}
             />
 
-            <Drawer 
-            destroyOnClose={true}
-            open={showAddModal} onClose={() => setShowAddModal(false)} width={720} title="Add Clothes">
+            <Drawer
+                destroyOnClose={true}
+                open={showAddModal} onClose={() => setShowAddModal(false)} width={720} title="Add Clothes">
                 <AddClothesPage onClose={() => {
                     setShowAddModal(false); fetch(`/api/clothes/by-capital/${capitalRecordId}`)
                         .then(res => res.json())
@@ -228,37 +272,37 @@ export default function ClothesByCapitalPage() {
                 }} />
             </Drawer>
 
-                <UpdateClothesDrawer 
-                    id={showUpdateDrawer.id}
-                    initialStockStatus={showUpdateDrawer.initialStockStatus}
-                    initialSalePrice={showUpdateDrawer.initialSalePrice}
-                    initialDiscountedPrice={showUpdateDrawer.initialDiscountedPrice}
-                    initialPrisedPrice={showUpdateDrawer.initialPrisedPrice}
-                    open={showUpdateDrawer.drawerOpen}
-                    onClose={() => setShowUpdateDrawer({
+            <UpdateClothesDrawer
+                id={showUpdateDrawer.id}
+                initialStockStatus={showUpdateDrawer.initialStockStatus}
+                initialSalePrice={showUpdateDrawer.initialSalePrice}
+                initialDiscountedPrice={showUpdateDrawer.initialDiscountedPrice}
+                initialPrisedPrice={showUpdateDrawer.initialPrisedPrice}
+                open={showUpdateDrawer.drawerOpen}
+                onClose={() => setShowUpdateDrawer({
+                    drawerOpen: false,
+                    id: '',
+                    initialStockStatus: undefined,
+                    initialSalePrice: undefined,
+                    initialDiscountedPrice: undefined,
+                    initialPrisedPrice: undefined,
+                })}
+                onUpdated={() => {
+                    fetch(`/api/clothes/by-capital/${capitalRecordId}`)
+                        .then(res => res.json())
+                        .then(data => setClothes(data))
+                        .catch(() => setClothes([]))
+                        .finally(() => setLoading(false));
+                    setShowUpdateDrawer({
                         drawerOpen: false,
                         id: '',
                         initialStockStatus: undefined,
                         initialSalePrice: undefined,
                         initialDiscountedPrice: undefined,
                         initialPrisedPrice: undefined,
-                    })}
-                    onUpdated={() => {
-                        fetch(`/api/clothes/by-capital/${capitalRecordId}`)
-                            .then(res => res.json())
-                            .then(data => setClothes(data))
-                            .catch(() => setClothes([]))
-                            .finally(() => setLoading(false));
-                        setShowUpdateDrawer({
-                            drawerOpen: false,
-                            id: '',
-                            initialStockStatus: undefined,
-                            initialSalePrice: undefined,
-                            initialDiscountedPrice: undefined,
-                            initialPrisedPrice: undefined,
-                        });
-                    }}
-                />
+                    });
+                }}
+            />
 
             {error && <div className="text-red-500">{error}</div>}
         </div>
