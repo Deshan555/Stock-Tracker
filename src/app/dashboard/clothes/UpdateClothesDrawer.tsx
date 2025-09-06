@@ -23,12 +23,13 @@ export default function UpdateClothesDrawer({ id, initialStockStatus, initialSal
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values: { stockStatus: string; salePrice: number; discountedPrice: number; prisedPrice: number }) => {
-    let jsonInput = {
-        "stockStatus": values.stockStatus,
-        "salePrice": values.prisedPrice - values.discountedPrice,
-        "discountedPrice": values.discountedPrice,
-        "prisedPrice": values.prisedPrice
-    }
+  let salePrice = values.stockStatus === "IN_STOCK" ? 0 : values.prisedPrice - values.discountedPrice;
+  let jsonInput = {
+    stockStatus: values.stockStatus,
+    salePrice,
+    discountedPrice: values.discountedPrice,
+    prisedPrice: values.prisedPrice
+  };
     setLoading(true);
     try {
       const res = await fetch(`/api/clothes/${id}`, {
