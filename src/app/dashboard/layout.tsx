@@ -84,7 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           mode="inline"
           defaultSelectedKeys={["/dashboard"]}
           items={menuItems}
-          style={{ height: 'calc(100vh - 64px)', overflow: 'hidden' }}
+          style={{ height: 'calc(100vh - 64px)', overflow: 'hidden', padding: 5 }}
           inlineCollapsed={collapsed}
         />
       </Sider>
@@ -94,7 +94,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           transition: 'margin-left 0.2s',
         }}
       >
-        <Content style={{ margin: 0, padding: "0 0 0 0", background: "#f9f9f9", minHeight: 280 }}>
+        <Content style={{ margin: 0, padding: "10px", background: "#f9f9f9", minHeight: 280 }}>
           {children}
         </Content>
       </Layout>
