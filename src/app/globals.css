@@ -513,6 +513,20 @@
   border: none !important;
   color: white !important;
   cursor: pointer !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 13px !important;
+}
+
+.cancel-button {
+  height: 38px !important;
+  width: auto;
+  border-radius: 10px !important;
+  background-color: #ABAAB2 !important;
+  border: none !important;
+  color: #ffffff !important;
+  cursor: pointer !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 13px !important;
 }
 
 .custom-tooltip .ant-tooltip-inner {
@@ -797,4 +811,36 @@
   font-family: 'Poppins', sans-serif !important;
   font-size: 12px !important;
   font-weight: 500 !important;
+}
+
+/* Force Ant Design Table font to Poppins */
+.ant-table, .ant-table * {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 12px !important;
+}
+
+.ant-table-thead > tr > th {
+  background-color: #F9F6FF !important;
+  font-weight: 600 !important;
+  color: #000000 !important;
+}
+.ant-table-tbody > tr > td {
+  font-weight: 500 !important;
+  color: #000000 !important;
+}
+
+/* Force Ant Design Statistic font to Poppins */
+.ant-statistic, .ant-statistic-title, .ant-statistic-content {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Force Ant Design Drawer header font to Poppins */
+.ant-drawer-title, .ant-drawer-header {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Force Ant Design Select and Option font to Poppins */
+.ant-select, .ant-select-dropdown, .ant-select-item, .ant-select-selection-item, .ant-select-item-option-content {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 12px !important;
 }
